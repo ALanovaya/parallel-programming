@@ -1,7 +1,5 @@
 package stack
 
-import stack.Stack
-import stack.Node
 import java.util.concurrent.atomic.AtomicReference
 
 class TreiberStack<T> : Stack<T> {
