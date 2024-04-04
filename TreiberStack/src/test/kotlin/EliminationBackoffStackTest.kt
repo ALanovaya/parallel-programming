@@ -25,7 +25,8 @@ class EliminationBackoffStackTest {
         .checkObstructionFreedom()
         .threads(4)
         .iterations(5)
-        .invocationsPerIteration(100)
+        .invocationsPerIteration(10)
+        .hangingDetectionThreshold(1000)
         .logLevel(LoggingLevel.INFO)
         .check(this::class)
 

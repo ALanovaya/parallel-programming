@@ -5,7 +5,7 @@ import kotlin.random.Random
 
 class EliminationBackoffStack<T>(
     private val capacity: Int = 10,
-    private val timeout: Long = 200,
+    private val timeout: Long = 5,
 ) : Stack<T> {
     companion object {
         private const val EMPTY = 0
@@ -15,6 +15,7 @@ class EliminationBackoffStack<T>(
 
     private val slotArray = Array<AtomicStampedReference<T?>>(capacity) { AtomicStampedReference(null, EMPTY) }
     private val stamp = intArrayOf(EMPTY)
+    private val rand = Random(System.currentTimeMillis())
 
     private val head: AtomicReference<Node<T>?> = AtomicReference(null)
 
@@ -29,7 +30,7 @@ class EliminationBackoffStack<T>(
         while (true) {
             if (tryPush(n)) return
 
-            val i = Random(System.currentTimeMillis()).nextInt(capacity)
+            val i = rand.nextInt(capacity)
             val timeLimit = System.nanoTime() + timeout
 
             while (System.nanoTime() < timeLimit) {
@@ -56,15 +57,26 @@ class EliminationBackoffStack<T>(
             val n = tryPop()
             if (n != null) return n.value
 
-            val i = Random(System.currentTimeMillis()).nextInt(capacity)
+            val i = rand.nextInt(capacity)
             val timeLimit = System.nanoTime() + timeout
 
             while (System.nanoTime() < timeLimit) {
                 val x = slotArray[i].get(stamp)
                 if (slotArray[i].compareAndSet(x, null, WAITING, BUSY)) return x
             }
+            return null
         }
     }
 
     override fun top(): T? = head.get()?.value
+
+    fun size(): Int {
+        var cout = 0
+        var cur = head.get()
+        while(cur != null) {
+            cout++
+            cur = cur.next
+        }
+        return cout
+    }
 }
