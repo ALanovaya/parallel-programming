@@ -1,2 +1,2 @@
-rootProject.name = "TraiberStack"
+rootProject.name = "TreiberStack"
 
