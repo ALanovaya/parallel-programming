@@ -86,16 +86,30 @@ class TreeOpt<T : Comparable<T>>(
         }
     }
 
-    suspend fun insert(value: T) {
-        var nd: NodeOpt<T>? = null
+    suspend fun find(data: T): Boolean {
+        var node: NodeOpt<T>? = null
         var parent: NodeOpt<T>? = null
-        find_node_parent(value).let { nd = it.first; parent = it.second }
+        find_node_parent(data).let { node = it.first; parent = it.second }
+        if (node == null) {
+            return false
+        }
+        val tempNd = node
+        tempNd?.unlock()
+        parent?.unlock()
+
+        return true
+    }
+
+    suspend fun insert(value: T) {
+        var node: NodeOpt<T>? = null
+        var parent: NodeOpt<T>? = null
+        find_node_parent(value).let { node = it.first; parent = it.second }
         if (root == null) {
             root = NodeOpt(value)
             unlock()
             return
         }
-        if (nd == null) {
+        if (node == null) {
             if (value < parent!!.value) {
                 parent?.left = NodeOpt(value)
             } else {
@@ -105,18 +119,62 @@ class TreeOpt<T : Comparable<T>>(
         parent?.unlock()
     }
 
-    suspend fun find(data: T): Boolean {
-        var nd: NodeOpt<T>? = null
+    fun remove(value: T) {
+        var node: NodeOpt<T>? = root
         var parent: NodeOpt<T>? = null
-        find_node_parent(data).let { nd = it.first; parent = it.second }
-        if (nd == null) {
-            return false
+        while (node != null && node.value != value) {
+            parent = node
+            if (value < node.value) {
+                node = node.left
+            } else {
+                node = node.right
+            }
         }
-        val tempNd = nd
-        tempNd?.unlock()
-        parent?.unlock()
 
-        return true
+        if (node == null) {
+            return
+        }
+
+        if (node.left == null && node.right == null) {
+            if (parent == null) {
+                root = null
+            } else if (parent.left == node) {
+                parent.left = null
+            } else {
+                parent.right = null
+            }
+        } else if (node.left == null) {
+            if (parent == null) {
+                root = node.right
+            } else if (parent.left == node) {
+                parent.left = node.right
+            } else {
+                parent.right = node.right
+            }
+        } else if (node.right == null) {
+            if (parent == null) {
+                root = node.left
+            } else if (parent.left == node) {
+                parent.left = node.left
+            } else {
+                parent.right = node.left
+            }
+        } else {
+            var succParent: NodeOpt<T>? = node
+            var succ: NodeOpt<T>? = node.right
+            while (succ?.left != null) {
+                succParent = succ
+                succ = succ.left
+            }
+
+            if (succParent != node) {
+                succParent?.left = succ?.right
+            } else {
+                node.right = succ?.right
+            }
+
+            node.value = succ?.value ?: return
+        }
     }
 
     fun isValid(): Boolean {
