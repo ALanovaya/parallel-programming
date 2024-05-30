@@ -1,12 +1,21 @@
-class Node(var value: Int, var left: Node? = null, var right: Node? = null)
+package trees
 
-class Tree(var root: Node? = null) {
+interface BST<T : Comparable<T>> {
+    suspend fun insert(value: T)
+    suspend fun find(value: T): Boolean
+    suspend fun remove(value: T)
+    suspend fun isValid(): Boolean
+}
 
-    fun insert(value: Int) {
+class Node<T : Comparable<T>>(var value: T, var left: Node<T>? = null, var right: Node<T>? = null)
+
+class Tree<T : Comparable<T>>(var root: Node<T>? = null) : BST<T> {
+
+    override suspend fun insert(value: T) {
         root?.insert(value) ?: run { root = Node(value) }
     }
 
-    private fun Node.insert(value: Int) {
+    private fun Node<T>.insert(value: T) {
         if (value <= this.value) {
             if (left == null) {
                 left = Node(value)
@@ -22,26 +31,26 @@ class Tree(var root: Node? = null) {
         }
     }
 
-    fun find(key: Int): Boolean {
-        return root?.find(key) == true
+    override suspend fun find(value: T): Boolean {
+        return root?.find(value) == true
     }
 
-    private fun Node.find(key: Int): Boolean {
-        if (this.value == key) {
+    private fun Node<T>.find(value: T): Boolean {
+        if (this.value == value) {
             return true
         }
-        return if (key < this.value) {
-            left?.find(key) ?: false
+        return if (value < this.value) {
+            left?.find(value) ?: false
         } else {
-            right?.find(key) ?: false
+            right?.find(value) ?: false
         }
     }
 
-    fun remove(key: Int) {
-        root = remove(root, key)
+    override suspend fun remove(value: T) {
+        root = remove(root, value)
     }
 
-    private fun remove(node: Node?, value: Int): Node? {
+    private fun remove(node: Node<T>?, value: T): Node<T>? {
         if (node == null) {
             return null
         }
@@ -53,7 +62,7 @@ class Tree(var root: Node? = null) {
             node.right = remove(node.right, value)
             return node
         }
-        // key == node.key
+
         if (node.left == null && node.right == null) {
             return null
         }
@@ -63,7 +72,7 @@ class Tree(var root: Node? = null) {
         if (node.right == null) {
             return node.left
         }
-        var leftMostRightSide: Node? = node.right
+        var leftMostRightSide: Node<T>? = node.right
         while (leftMostRightSide?.left != null) {
             leftMostRightSide = leftMostRightSide.left
         }
@@ -74,11 +83,11 @@ class Tree(var root: Node? = null) {
         return node
     }
 
-    fun isValid(): Boolean {
+     override suspend fun isValid(): Boolean {
         return root?.isValid() ?: true
     }
 
-    private fun Node.isValid(): Boolean {
+    private fun Node<T>.isValid(): Boolean {
         val leftNode = left
         if (leftNode!= null && leftNode.value > value) {
             return false

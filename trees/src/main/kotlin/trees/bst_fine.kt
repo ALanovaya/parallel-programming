@@ -26,7 +26,7 @@ class NodeFine<T : Comparable<T>>(var value: T) {
     }
 }
 
-class TreeFine<T : Comparable<T>> {
+class TreeFine<T : Comparable<T>> : BST<T> {
     private var root: NodeFine<T>? = null
     private val mutex = Mutex()
 
@@ -73,7 +73,7 @@ class TreeFine<T : Comparable<T>> {
         return node to parent
     }
 
-    suspend fun insert(value: T) {
+    override suspend fun insert(value: T) {
         val (node, parent) = find_node_parent(value)
         val new_node = NodeFine(value)
         if (root == null) {
@@ -93,7 +93,7 @@ class TreeFine<T : Comparable<T>> {
         }
     }
 
-    suspend fun find(value: T): Boolean {
+    override suspend fun find(value: T): Boolean {
         val (node, parent) = find_node_parent(value)
         parent_unlock(parent)
         if (node != null) {
@@ -103,7 +103,7 @@ class TreeFine<T : Comparable<T>> {
         return false
     }
 
-    suspend fun remove(value: T) {
+    override suspend fun remove(value: T) {
         val (node, parent) = find_node_parent(value)
         parent_unlock(parent)
         if (node == null) {
@@ -164,7 +164,7 @@ class TreeFine<T : Comparable<T>> {
         node.value = succ.value
     }
 
-    suspend fun isValid(): Boolean {
+    override suspend fun isValid(): Boolean {
         return root?.isValid()?: true
     }
 }

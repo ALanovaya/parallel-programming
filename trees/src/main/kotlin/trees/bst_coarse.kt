@@ -2,38 +2,38 @@ package trees
 
 import kotlinx.coroutines.sync.Mutex
 
-class Tree<T : Comparable<T>> {
+class TreeCoarse<T : Comparable<T>> : BST<T>  {
     private val tree: Tree<T> = Tree()
     private val mutex = Mutex()
 
-    suspend fun insert(data: T) {
+    override suspend fun insert(value: T) {
         mutex.lock()
         try {
-            tree.insert(data)
+            tree.insert(value)
         } finally {
             mutex.unlock()
         }
     }
 
-    suspend fun remove(data: T) {
+    override suspend fun remove(value: T) {
         mutex.lock()
         try {
-            tree.remove(data)
+            tree.remove(value)
         } finally {
             mutex.unlock()
         }
     }
 
-    suspend fun find(data: T): Boolean {
+    override suspend fun find(value: T): Boolean {
         mutex.lock()
         try {
-            return tree.find(data)
+            return tree.find(value)
         } finally {
             mutex.unlock()
         }
     }
 
-    suspend fun isValid(): Boolean {
+    override suspend fun isValid(): Boolean {
         mutex.lock()
         try {
             return tree.isValid()

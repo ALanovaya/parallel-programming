@@ -30,7 +30,7 @@ class NodeOpt<T : Comparable<T>>(
 class TreeOpt<T : Comparable<T>>(
     private var root: NodeOpt<T>? = null,
     private val mutex: Mutex = Mutex()
-) {
+) : BST<T> {
     suspend fun lock() {
         mutex.lock()
     }
@@ -86,10 +86,10 @@ class TreeOpt<T : Comparable<T>>(
         }
     }
 
-    suspend fun find(data: T): Boolean {
+    override suspend fun find(value: T): Boolean {
         var node: NodeOpt<T>? = null
         var parent: NodeOpt<T>? = null
-        find_node_parent(data).let { node = it.first; parent = it.second }
+        find_node_parent(value).let { node = it.first; parent = it.second }
         if (node == null) {
             return false
         }
@@ -100,7 +100,7 @@ class TreeOpt<T : Comparable<T>>(
         return true
     }
 
-    suspend fun insert(value: T) {
+    override suspend fun insert(value: T) {
         var node: NodeOpt<T>? = null
         var parent: NodeOpt<T>? = null
         find_node_parent(value).let { node = it.first; parent = it.second }
@@ -119,7 +119,7 @@ class TreeOpt<T : Comparable<T>>(
         parent?.unlock()
     }
 
-    fun remove(value: T) {
+    override suspend fun remove(value: T) {
         var node: NodeOpt<T>? = root
         var parent: NodeOpt<T>? = null
         while (node != null && node.value != value) {
@@ -177,7 +177,7 @@ class TreeOpt<T : Comparable<T>>(
         }
     }
 
-    fun isValid(): Boolean {
+    override suspend fun isValid(): Boolean {
         return root?.isValid() ?: true
     }
 }
